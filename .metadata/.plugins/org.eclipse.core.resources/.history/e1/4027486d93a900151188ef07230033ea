@@ -1,0 +1,14 @@
+/**
+ * 
+ */
+package predicate;
+
+/**
+ * @author Aleix
+ *
+ */
+public abstract class Predicate {
+
+	public Box b;
+	public Office o;
+}

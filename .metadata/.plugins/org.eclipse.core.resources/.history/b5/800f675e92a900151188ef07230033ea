@@ -1,0 +1,13 @@
+package predicate;
+
+/**
+ * Office o is clean
+ * @author Aleix
+ *
+ */
+public class Clean {
+
+	public Clean(Office o){
+		
+	}
+}

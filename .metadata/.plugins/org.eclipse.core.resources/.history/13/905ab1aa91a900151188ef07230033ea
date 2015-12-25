@@ -1,0 +1,10 @@
+package operator;
+
+import item.Office;
+
+public class CleanOffice {
+
+	public CleanOffice(Office o){
+		
+	}
+}

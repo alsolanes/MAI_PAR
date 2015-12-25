@@ -1,0 +1,13 @@
+package predicate;
+
+/**
+ * The robot is in office o
+ * @author Aleix
+ *
+ */
+public class RobotLocation {
+
+	public RobotLocation(Office o){
+		
+	}
+}

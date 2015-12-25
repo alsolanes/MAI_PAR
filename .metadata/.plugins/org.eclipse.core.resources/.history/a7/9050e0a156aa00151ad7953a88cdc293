@@ -1,0 +1,30 @@
+package operator;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+import predicate.Predicate;
+
+public abstract class Operator {
+
+	Map <String, Predicate> list_preconditions;
+	Map <String, Predicate> list_add;
+	Map <String, Predicate> list_delete;
+	
+	public Operator(){
+		this.list_preconditions = new HashMap<String, Predicate>();
+		this.list_add = new HashMap<String, Predicate>();
+		this.list_delete = new HashMap<String, Predicate>();
+	}
+	
+	/**
+	 * sets all preconditions to a HashMap
+	 * @param pred
+	 */
+	public Operator(Map<String, Predicate> preconditions, Map<String, Predicate> add, Map<String, Predicate> delete){
+		this.list_preconditions = preconditions;
+		this.list_add = add;
+		this.list_delete = delete;
+	}
+}

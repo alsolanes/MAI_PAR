@@ -1,0 +1,13 @@
+package state;
+
+import java.util.Map;
+
+import operator.Operator;
+
+public class State {
+
+	private Map<String, List<Predicate>> preconditions;
+	private Operator operator;
+	private State nextState;
+	
+}

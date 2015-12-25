@@ -1,0 +1,12 @@
+import config.ConfigLoader;
+
+public class MyMain {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		System.out.println("Hi");
+		ConfigLoader loader = new ConfigLoader();
+		loader.load();
+	}
+
+}

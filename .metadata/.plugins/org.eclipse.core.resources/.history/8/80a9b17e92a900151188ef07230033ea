@@ -1,0 +1,5 @@
+package predicate;
+
+public class Empty {
+
+}

@@ -1,0 +1,12 @@
+/**
+ * 
+ */
+package predicate;
+
+/**
+ * @author Aleix
+ *
+ */
+public abstract class Predicate {
+
+}

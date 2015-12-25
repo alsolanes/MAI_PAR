@@ -1,0 +1,8 @@
+package operator;
+
+public class Move {
+
+	public Move(Office o1, Office o2){
+		
+	}
+}

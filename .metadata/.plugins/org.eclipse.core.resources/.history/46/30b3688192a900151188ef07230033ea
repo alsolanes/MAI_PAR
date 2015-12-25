@@ -1,0 +1,13 @@
+package predicate;
+
+/**
+ * There isn't any box in office o
+ * @author Aleix
+ *
+ */
+public class Empty {
+
+	public Empty(Office o){
+		
+	}
+}

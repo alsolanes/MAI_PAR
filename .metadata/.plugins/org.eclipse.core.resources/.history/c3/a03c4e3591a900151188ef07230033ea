@@ -1,0 +1,8 @@
+package operator;
+
+public class Push {
+
+	public Push(Box b, Office o1, Office o2){
+		
+	}
+}

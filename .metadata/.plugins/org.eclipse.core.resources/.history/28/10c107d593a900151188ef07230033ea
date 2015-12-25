@@ -1,0 +1,17 @@
+/**
+ * 
+ */
+package predicate;
+
+import item.Box;
+import item.Office;
+
+/**
+ * @author Aleix
+ *
+ */
+public abstract class Predicate {
+
+	public Box b;
+	public Office o;
+}

@@ -1,0 +1,21 @@
+package operator;
+
+import java.util.HashMap;
+import java.util.Set;
+
+import predicate.Predicate;
+
+public abstract class Operator {
+
+	HashMap <String, Predicate> list_preconditions;
+	
+	/**
+	 * sets all preconditions to a HashMap
+	 * @param pred
+	 */
+	public Operator(Set<Predicate> pred){
+		this.list_preconditions = new HashMap<>();
+		for(Predicate p : pred)
+			this.list_preconditions.put(p.toString(), p);
+	}
+}

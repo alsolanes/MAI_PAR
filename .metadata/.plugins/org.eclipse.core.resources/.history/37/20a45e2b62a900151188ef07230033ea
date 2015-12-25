@@ -1,0 +1,17 @@
+package item;
+
+import java.util.Map;
+
+public class Office {
+	public String id;
+	Map<String, Office> adjacent_offices;
+	
+	public Office(String id){
+		this.id = id;
+		this.adjacent_offices = new HashMap<String, Office>();
+	}
+	
+	public void add_adjacent(Office off){
+		this.adjacent_offices
+	}
+}

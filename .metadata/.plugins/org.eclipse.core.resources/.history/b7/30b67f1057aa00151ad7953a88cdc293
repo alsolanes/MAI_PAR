@@ -1,0 +1,15 @@
+package predicate;
+
+import item.Office;
+
+/**
+ * Office o is clean
+ * @author Aleix
+ *
+ */
+public class Clean extends Predicate {
+
+	public Clean(Office o){
+		
+	}
+}
