@@ -1,5 +1,7 @@
 package predicate;
 
+import constants.PreconditionName;
+import item.Box;
 import item.Office;
 
 /**
@@ -9,7 +11,17 @@ import item.Office;
  */
 public class BoxLocation extends Predicate {
 	
-	public BoxLocation(Office o){
+	Office o;
+	Box b;
 	
+	public BoxLocation(Box b, Office o){
+		super();
+		this.o = o;
+		this.b = b;
+		this.name = PreconditionName.BOXLOCATION;
+	}
+	
+	public String toString(){
+		return "Box-location("+ b.id + "," + o.id + ")";
 	}
 }

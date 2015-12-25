@@ -1,5 +1,6 @@
 package predicate;
 
+import constants.PreconditionName;
 import item.Office;
 
 /**
@@ -9,7 +10,15 @@ import item.Office;
  */
 public class RobotLocation extends Predicate {
 
+	Office o;
+	
 	public RobotLocation(Office o){
-		
+		super();
+		this.o = o;
+		this.name = PreconditionName.ROBOTLOCATION;
+	}
+	
+	public String toString(){
+		return "Robot-location("+o.id+")";
 	}
 }
