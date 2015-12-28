@@ -4,35 +4,42 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import constants.PreconditionName;
+import item.Office;
+import operator.CleanOffice;
+import operator.Move;
 import operator.Operator;
+import operator.Push;
+import predicate.Empty;
 import predicate.Predicate;
 
 public class State {
 
-	private Map<String, List<Predicate>> preconditions;
+	private Map<String, List<Predicate>> conditions;
 	private Operator operator;
 	private State nextState;
 	
 	public State() {
-		this.preconditions = new HashMap<String, List<Predicate>>();
+		this.conditions = new HashMap<String, List<Predicate>>();
 	}
 	
-	public State(Map<String, List<Predicate>> preconditions) {
-		this.preconditions = preconditions;
+	public State(Map<String, List<Predicate>> conditions) {
+		this.conditions = conditions;
 	}
 	
 	/**
-	 * @return the preconditions
+	 * @return the conditions
 	 */
-	public Map<String, List<Predicate>> getPreconditions() {
-		return preconditions;
+	public Map<String, List<Predicate>> getConditions() {
+		return conditions;
 	}
 
 	/**
-	 * @param preconditions the preconditions to set
+	 * @param conditions 
+	 * the conditions to set
 	 */
-	public void setPreconditions(Map<String, List<Predicate>> preconditions) {
-		this.preconditions = preconditions;
+	public void setConditions(Map<String, List<Predicate>> conditions) {
+		this.conditions = conditions;
 	}
 
 	/**
@@ -72,7 +79,7 @@ public class State {
 		int result = 1;
 		result = prime * result + ((nextState == null) ? 0 : nextState.hashCode());
 		result = prime * result + ((operator == null) ? 0 : operator.hashCode());
-		result = prime * result + ((preconditions == null) ? 0 : preconditions.hashCode());
+		result = prime * result + ((conditions == null) ? 0 : conditions.hashCode());
 		return result;
 	}
 
@@ -89,15 +96,30 @@ public class State {
 			return false;
 		State other = (State) obj;
 		
-		if (preconditions == null) {
-			if (other.preconditions != null)
+		if (conditions == null) {
+			if (other.conditions != null)
 				return false;
-		} else if (!preconditions.equals(other.preconditions))
+		} else if (!conditions.equals(other.conditions))
 			return false;
 		
 		return true;
 	}
 	
+	/**
+	 * Check whether the state verifies the preconditions of the operator.
+	 * @param op
+	 * @param st
+	 * @return
+	 */
+	public boolean isValidOperator(Operator op, State st){
+		List<Predicate> lst_prec = (List<Predicate>) op.getList_preconditions().values();
+		for(Predicate p : lst_prec){
+			if(!st.getConditions().values().contains(p)){
+				return false;
+			}
+		}
+		return true;
+	}
 
 	
 	

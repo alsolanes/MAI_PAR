@@ -17,6 +17,20 @@ public class Empty extends Predicate {
 		this.name = PreconditionName.EMPTY;
 	}
 	
+	/**
+	 * @return the o
+	 */
+	public Office getO() {
+		return o;
+	}
+
+	/**
+	 * @param o the o to set
+	 */
+	public void setO(Office o) {
+		this.o = o;
+	}
+
 	public String toString() {
 		return "Empty("+o.id+")";
 	}
