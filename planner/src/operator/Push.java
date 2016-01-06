@@ -26,41 +26,42 @@ public class Push extends Operator{
 		init_pre();
 		init_add();
 		init_del();
+		super.name = "PUSH";
 	}
 	private void init_pre() {
 		Predicate rob_loc = new predicate.RobotLocation(o1);
-		this.list_preconditions.put(PreconditionName.ROBOTLOCATION, rob_loc);
+		this.list_preconditions.add(rob_loc);
 		
 		Predicate box_loc = new predicate.BoxLocation(b,o1);
-		this.list_preconditions.put(PreconditionName.BOXLOCATION, box_loc);
+		this.list_preconditions.add(box_loc);
 		
 		Predicate adj = new predicate.Adjacent(o1,o2);
-		this.list_preconditions.put(PreconditionName.ADJACENT, adj);
+		this.list_preconditions.add(adj);
 		
 		Predicate empt = new predicate.Empty(o2);
-		this.list_preconditions.put(PreconditionName.EMPTY, empt);
+		this.list_preconditions.add(empt);
 	}
 	
 	private void init_add() {
 		Predicate box_loc = new predicate.BoxLocation(b,o2);
-		this.list_preconditions.put(PreconditionName.BOXLOCATION, box_loc);
+		this.list_add.add(box_loc);
 		
 		Predicate rob_loc = new predicate.RobotLocation(o2);
-		this.list_preconditions.put(PreconditionName.ROBOTLOCATION, rob_loc);
+		this.list_add.add(rob_loc);
 		
 		Predicate empt = new predicate.Empty(o1);
-		this.list_preconditions.put(PreconditionName.EMPTY, empt);
+		this.list_add.add(empt);
 	}
 	
 	private void init_del() {
 		Predicate empt = new predicate.Empty(o2);
-		this.list_preconditions.put(PreconditionName.EMPTY, empt);
+		this.list_delete.add(empt);
 		
 		Predicate box_loc = new predicate.BoxLocation(b,o1);
-		this.list_preconditions.put(PreconditionName.BOXLOCATION, box_loc);
+		this.list_delete.add(box_loc);
 		
 		Predicate rob_loc = new predicate.RobotLocation(o1);
-		this.list_preconditions.put(PreconditionName.ROBOTLOCATION, rob_loc);
+		this.list_delete.add(rob_loc);
 	}
 	
 	
@@ -102,5 +103,8 @@ public class Push extends Operator{
 	}
 	public String toString(){
 		return "Push("+b.id+","+o1.id+","+o2.id+")";
+	}
+	public String getName(){
+		return super.name;
 	}
 }

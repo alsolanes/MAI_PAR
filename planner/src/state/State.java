@@ -1,45 +1,54 @@
 package state;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import constants.PreconditionName;
+import item.Box;
 import item.Office;
 import operator.CleanOffice;
 import operator.Move;
 import operator.Operator;
 import operator.Push;
+import predicate.BoxLocation;
+import predicate.Clean;
+import predicate.Dirty;
 import predicate.Empty;
 import predicate.Predicate;
+import predicate.RobotLocation;
 
 public class State {
 
-	private Map<String, List<Predicate>> conditions;
+	private List<Predicate> predicates;
+	private ArrayList<Office> offices;
 	private Operator operator;
 	private State nextState;
+	private Office robotPosition;
 	
 	public State() {
-		this.conditions = new HashMap<String, List<Predicate>>();
+		this.predicates = new ArrayList<Predicate>();
 	}
 	
-	public State(Map<String, List<Predicate>> conditions) {
-		this.conditions = conditions;
+	public State(List<Predicate> conditions, ArrayList<Office> off_list) {
+		this.predicates = conditions;
+		this.offices = off_list;
 	}
 	
 	/**
 	 * @return the conditions
 	 */
-	public Map<String, List<Predicate>> getConditions() {
-		return conditions;
+	public List<Predicate> getConditions() {
+		return predicates;
 	}
 
 	/**
 	 * @param conditions 
 	 * the conditions to set
 	 */
-	public void setConditions(Map<String, List<Predicate>> conditions) {
-		this.conditions = conditions;
+	public void setConditions(List<Predicate> conditions) {
+		this.predicates = conditions;
 	}
 
 	/**
@@ -48,6 +57,7 @@ public class State {
 	public Operator getOperator() {
 		return operator;
 	}
+
 
 	/**
 	 * @param operator the operator to set
@@ -79,7 +89,7 @@ public class State {
 		int result = 1;
 		result = prime * result + ((nextState == null) ? 0 : nextState.hashCode());
 		result = prime * result + ((operator == null) ? 0 : operator.hashCode());
-		result = prime * result + ((conditions == null) ? 0 : conditions.hashCode());
+		result = prime * result + ((predicates == null) ? 0 : predicates.hashCode());
 		return result;
 	}
 
@@ -96,14 +106,16 @@ public class State {
 			return false;
 		State other = (State) obj;
 		
-		if (conditions == null) {
-			if (other.conditions != null)
+		if (predicates == null) {
+			if (other.predicates != null)
 				return false;
-		} else if (!conditions.equals(other.conditions))
+		} else if (!predicates.equals(other.predicates))
 			return false;
 		
 		return true;
 	}
+	
+	
 	
 	/**
 	 * Check whether the state verifies the preconditions of the operator.
@@ -112,15 +124,185 @@ public class State {
 	 * @return
 	 */
 	public boolean isValidOperator(Operator op, State st){
-		List<Predicate> lst_prec = (List<Predicate>) op.getList_preconditions().values();
+		getRobotPosition();
+		List<Predicate> lst_prec = (List<Predicate>) op.getList_preconditions();
 		for(Predicate p : lst_prec){
-			if(!st.getConditions().values().contains(p)){
+			// if the predicate is not in the list and it is not predicate Adjacent (which is not in the state list)
+			if(!st.getConditions().contains(p)){
+				if(!p.getName().contains(PreconditionName.ADJACENT))					
+					return false;
+			} 
+			if(op.getName().contains("CLEAN")){
+				CleanOffice p1 = (CleanOffice) op;
+				Dirty d = new Dirty(p1.getO());
+				RobotLocation rl = new RobotLocation(p1.getO());
+				Empty e = new Empty(p1.getO());
+				if(!lst_prec.contains(d)){
+					return false;
+				} else if(!lst_prec.contains(rl)){
+					return false;
+				} else if(!lst_prec.contains(e)){
+					return false;
+				}
+			}else if(op.getName().contains("MOVE")){
+				Move p1 = (Move) op;
+				RobotLocation rl = new RobotLocation(p1.getO1());
+				if(!p1.getO1().is_adjacent(p1.getO2())){
+					return false;
+				} else if(!p1.getO1().equals(robotPosition)){
+					return false;
+				}
+			}else if(op.getName().contains("PUSH")){
+				Push p1 = (Push) op;
+				Empty e = new Empty(p1.getO2());
+				BoxLocation bl = new BoxLocation(p1.getB(),p1.getO1());
+				if(!p1.getO1().is_adjacent(p1.getO2())){
+					return false;
+				}
+				if(!p1.getO1().equals(robotPosition)){
+					return false;
+				}
+				if(!lst_prec.contains(e)){
+					return false;
+				}
+				if(!predicates.contains(bl))
+					return false;
+			}
+			
+		}
+		return true;
+	}
+	/**
+	 * Check whether a state verifies the Add_list, which is like the precondition in the regression model
+	 * @param op
+	 * @param st
+	 * @return
+	 */
+	public boolean isRegressionValid(Operator op, State st){
+		List<Predicate> lst_add = (List<Predicate>) op.getList_add();
+		// check whether the state contains each of the predicates of the add list
+		for(Predicate p : lst_add){
+			if(!st.getConditions().contains(p)){
 				return false;
 			}
 		}
 		return true;
 	}
 
+	/**
+	 * Add predicates to the list of conditions of a state
+	 */
+	public void addPredicates(List<Predicate> in){
+		for(Predicate p : in){
+			if(!this.predicates.contains(p)){
+				this.predicates.add(p);
+			}
+		}
+	}
 	
+	/**
+	 * Delete predicates of the conditions list
+	 */
+	public void deletePredicates(List<Predicate> in){
+		for(Predicate p: in){
+			if(this.predicates.contains(p)){
+				this.predicates.remove(p);
+			}else{
+				System.out.println("Not found:"+p.toString());
+			}
+		}
+	}
 	
+	public String toString(){
+		String out = "";
+		for (Predicate p : predicates){
+			out += p.toString();
+		}
+		return out;
+	}
+	
+	public Office getRobotPosition(){
+		for (Predicate p : predicates){
+			if (p.getName().contains(PreconditionName.ROBOTLOCATION)){
+				robotPosition = p.getOffice();
+				return p.getOffice();
+			}
+		}
+		return null;
+	}
+	
+	public ArrayList<BoxLocation> getBoxes(){
+		ArrayList<BoxLocation> b = new ArrayList<BoxLocation>();
+		for(Predicate p : predicates){
+			if(p.getName().contains(PreconditionName.BOXLOCATION)){
+				b.add((BoxLocation) p);
+			}
+		}
+		return b;
+	}
+	
+	public ArrayList<Office> getAdjacentOffices(){
+		getRobotPosition();
+		ArrayList<Office> adj = new ArrayList<Office>();
+		ArrayList<Integer> adj_list = robotPosition.adjacent_list;
+		for (Office o1 : offices){
+			if (adj_list.contains(o1.position)){
+				adj.add(o1);
+			}
+		}
+		return adj;
+	}
+	
+	public ArrayList<Predicate> getPredicatesOffice(String o){
+		ArrayList<Predicate> out = new ArrayList<Predicate>();
+		for (Predicate p : predicates){
+			if(p.getOffice().id.equals(o)){
+				out.add(p);
+			}
+		}
+		return out;
+	}
+	/**
+	 * This functions returns a list of Operators that verify the preconditions and so can be executed
+	 * @return
+	 */
+	public ArrayList<Operator> possibleActions(){
+		ArrayList<Operator> out = new ArrayList<Operator>();
+		// first we get the position of the robot
+		getRobotPosition();
+		// check if it is possible to clean
+		CleanOffice co = new CleanOffice(robotPosition);
+		if (isValidOperator(co, this)){
+			out.add(co);
+		}
+		
+		// first we check which offices are adjacent in order to know to where can move/push
+		ArrayList<Office> offices_near = new ArrayList<Office>();
+		for(int i:robotPosition.adjacent_list){
+			for(Office o : offices){
+				if(o.position==i)
+					offices_near.add(o);
+			}
+		}
+			
+		// we then get the box locations
+		ArrayList<BoxLocation> bl = getBoxes();
+		// check which moves can do
+		for(Office o : offices_near){
+			Move m = new Move(robotPosition, o);
+			
+			if(isValidOperator(m, this))
+				out.add(m);
+			// check which push can do
+			for(BoxLocation b : bl){
+				Push p = new Push(b.getBox(),robotPosition,o);
+				if(isValidOperator(p, this)){
+					out.add(p);
+				}
+			}
+		}
+		
+		
+		return out;
+	}
 }

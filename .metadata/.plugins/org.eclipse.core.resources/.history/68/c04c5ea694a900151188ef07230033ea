@@ -1,8 +1,0 @@
-package operator;
-
-public abstract class Operator {
-
-	HashMap <String, Predicate> list_preconditions;
-	
-	public Operatora
-}

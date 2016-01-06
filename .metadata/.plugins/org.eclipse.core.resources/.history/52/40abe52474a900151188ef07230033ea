@@ -1,8 +1,0 @@
-Boxes=A,B
-Offices=o1,o2,o3,o4
-InitialState=Box-location(A,o1);Box-location(B,o2);
-Clean(o2);Clean(o3);Clean(o4);Dirty(o1);Empty(o3);Empty(o4);
-Robot-location(o4)
-GoalState=Box-location(A,o3);Box-location(B,o4);
-Clean(o1);Clean(o2);Clean(o3);Clean(o4);Empty(o1);Empty(o2);
-Robot-location(o1)

@@ -1,0 +1,234 @@
+package config;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import item.Box;
+import item.Office;
+import operator.CleanOffice;
+import predicate.BoxLocation;
+import predicate.Clean;
+import predicate.Dirty;
+import predicate.Empty;
+import predicate.Predicate;
+import predicate.RobotLocation;
+
+/**
+ * This class will load the configuration files.
+ * The initial and goal states.
+ * @author Aleix
+ *
+ */
+public class ConfigLoader {
+	
+	String file_path;
+	ArrayList<Box> boxes;
+	ArrayList<Office> offices;
+	Map<String, List<String>> config; 
+	
+	public ConfigLoader(){
+		this.file_path = System.getProperty("user.dir") + "/src/config/";
+	}
+	
+	public void load(String file){
+		this.file_path += file;
+		System.out.println("loading...");
+		config = this.loadConfFile();
+		System.out.println(config);
+	}
+	
+	public Map<String, List<String>> loadConfFile(){
+		BufferedReader br = null;
+		try {
+			br = new BufferedReader(new FileReader(this.file_path));
+		} catch (IOException e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+		
+		Map<String, List<String>> properties = new HashMap();
+		try {
+			
+			String line = br.readLine();
+			
+			String key = null,cur_vals = null;
+			String[] vals = null;
+			
+			while(line!=null){
+				//first we remove all whitespaces
+				line = line.replaceAll("\\s+", "");
+				//then we locate the "=" symbol.
+				
+				if(line.indexOf("=")!=-1){
+					String[] items = line.split("=");
+					key = items[0];
+					cur_vals = items[1];
+					properties.put(key, new ArrayList<String>());
+				}
+				if(line.indexOf(";")!=-1){
+					vals = cur_vals.split(";");
+				} else if(line.indexOf(",")!=-1){
+					vals = cur_vals.split(",");
+				}
+				for(String val : vals)
+					properties.get(key).add(val);
+				
+				line = br.readLine();
+			}
+			br.close();
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+		return properties;
+	}
+	
+	public List<String> getInitialState(){
+		List<String> initState = new ArrayList<String>();
+		initState = config.get("InitialState");
+		return initState;
+	}
+	
+	public List<String> getGoalState(){
+		List<String> goalState = new ArrayList<String>();
+		goalState = config.get("GoalState");
+		return goalState;
+	}
+	
+	public List<String> getBoxes(){
+		List<String> boxes = new ArrayList<String>();
+		boxes = config.get("Boxes");
+		return boxes;
+	}
+	
+	/**
+	 * Returns a list of offices taken from the file previously read.
+	 * @return
+	 */
+	public List<Office> getOffices(){
+		List<String> offic = new ArrayList<String>();
+		List<Office> out = new ArrayList<Office>();
+		offic = config.get("Offices");
+		int i = 1;
+		for (String off : offic){
+			Office o = new Office(off,i);
+			out.add(o);
+			i++;
+		}
+		return out;
+	}
+	
+	/**
+	 * Returns an Office from an id
+	 * @param id
+	 * @return
+	 */
+	public Office getOffice(String id){
+		for (Office o1: offices){
+			if(o1.id.equals(id))
+				return o1;
+		}
+		return null;
+	}
+	
+	/**
+	 * Given a "init" list which contains a list of String with the predicates of each , returns a map with each predicate related to an Office.
+	 * @param init
+	 * @return
+	 */
+	public Map<Office, Predicate> parseState(List<String> init){
+		//List<String> init = getInitialState();
+		// parse "init" to Office and Predicate types
+		// off will contain a list of the current Offices.
+		List<Office> off = getOffices();
+		offices = (ArrayList<Office>) off;
+		// pred will contain a list of predicates for the current state
+		List<Predicate> pred = parsePredicates(init);
+		Map<Office,Predicate> office_info = new HashMap<>();
+		for (Predicate p : pred){
+			office_info.put(p.getOffice(), p);
+		}
+		
+		
+		return office_info;
+	}
+
+	
+	/**
+	 * Prints a representation of the building in a 3by3 grid. 
+	 * @return
+	 */
+	public String printStateMap(Map<String, List<String>> in){
+		//Map<String, List<String>> in = parseInitialState();
+		String out = "";
+		int i = 0;
+		for (String a:in.keySet()){
+			i++;
+			String out_aux = "";
+			if(i==1 || i==4 || i==7) out+="\n---|---|---\n";
+			else out+="|";
+			for (String val:in.get(a)){
+				
+				if(val.contains("Robot")){
+					out_aux+=val.substring(0, 1);
+				}else if(val.contains("Box") || val.contains("Empty")){
+					out_aux+=val.substring(0, 1);
+				}else if(val.contains("Dirty") || val.contains("Clean")){
+					out_aux+=val.substring(0, 1);
+				}else{
+					out_aux = "Error";
+				}
+			}
+			if(out_aux.length()<3){
+				int rem = 3-out_aux.length();
+				for(int i1 = 0; i1<rem; i1++)
+					out_aux+=" ";
+			}
+			out+=out_aux;
+		}
+		return out+="\n---|---|---\n";
+	}
+	
+	/**
+	 * prints a state
+	 * @param in - a list with the predicates of the state
+	 * @return
+	 */
+	public String printState(List<String> in){
+		Map<String, List<String>> mapOut = parseState(in);
+		return printStateMap(mapOut);
+	}
+	
+
+	
+	public List<Predicate> parsePredicates(List<String> conditions_string){
+		List<Predicate> out = null;
+		for(String pred : conditions_string){
+			Predicate p = null;
+			if(pred.contains("Box")){
+				Box box = new Box(pred.substring(pred.indexOf("(")+1, pred.lastIndexOf(",")));
+				Office office = getOffice(pred.substring(pred.indexOf(",")+1,pred.lastIndexOf(")")));
+				p = new BoxLocation(box, office);
+			}else if (pred.contains("Clean")){
+				Office office = getOffice(pred.substring(pred.indexOf("(")+1, pred.lastIndexOf(")")));
+				p = new Clean(office);
+			}else if (pred.contains("Dirty")){
+				Office office = getOffice(pred.substring(pred.indexOf("(")+1, pred.lastIndexOf(")")));
+				p = new Dirty(office);
+			}else if (pred.contains("Empty")){
+				Office office = getOffice(pred.substring(pred.indexOf("(")+1, pred.lastIndexOf(")")));
+				p = new Empty(office);
+			}else if (pred.contains("Robot")){
+				Office office = getOffice(pred.substring(pred.indexOf("(")+1, pred.lastIndexOf(")")));
+				p = new RobotLocation(office);
+			}
+			out.add(p);
+		}
+		return out;
+	}
+}

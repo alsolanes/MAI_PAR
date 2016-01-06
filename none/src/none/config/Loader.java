@@ -31,9 +31,8 @@ public class Loader {
      */
     public Loader(int level) {
         if(level == 0){
-            this.dimension = 3;
+            this.dimension = 2;
         }
-        level = 3;
         this.config_file_path = System.getProperty("user.dir") + "/src/none/config/config." + this.dimension + ".level." + level + ".txt";
         this.load(); // load the configuration at @level
         this.initMaps();

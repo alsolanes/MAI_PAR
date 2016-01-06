@@ -13,6 +13,7 @@ import item.Office;
 public abstract class Predicate {
 
 	protected String name = "";
+	public Office affectedOffice;
 	
 	public Predicate(){
 		
@@ -24,5 +25,11 @@ public abstract class Predicate {
 	
 	public void setName(String name){
 		this.name = name;
+	}
+	
+
+	public Office getOffice() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

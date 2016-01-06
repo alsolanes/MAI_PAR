@@ -1,0 +1,16 @@
+import java.util.Queue;
+
+/** 
+ * This planner will begin from the goal and go backwards until achives the initial state.
+ * This option, will consider goal stack planning and protective achieved goals to prevent errors.
+ */
+
+/**
+ * @author Aleix
+ *
+ */
+public class RegressionPlanner {
+	Queue<State> state_path;
+	
+	public 
+}

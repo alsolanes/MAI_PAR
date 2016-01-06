@@ -28,7 +28,7 @@ public class Main {
         List: collection that contains ordered elements
          */
         // planners.put(RunnerLinear.class.getSimpleName(), new RunnerLinear());
-        planners.put(RunnerRegression.class.getSimpleName(), new RunnerRegression());
+        planners.put(RunnerDepthFirst.class.getSimpleName(), new RunnerDepthFirst());
         planners.put(RunnerRestriction.class.getSimpleName(), new RunnerRestriction());
 
         Loader configuration = new Loader(0);
@@ -38,7 +38,7 @@ public class Main {
                 ArrayList options = printMenu(planners.keySet());
                 System.out.println("Select planner: ");
                 // keyboard = br.readLine();
-                keyboard = "0";
+                keyboard = "1";
                 System.out.println("... " + keyboard + " --> ");
                 if (Integer.parseInt(keyboard) < options.size()  && Integer.parseInt(keyboard)>= 0) {
                     planners.get(options.get(Integer.parseInt(keyboard))).execute(configuration);

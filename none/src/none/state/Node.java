@@ -14,6 +14,8 @@ import java.util.Set;
  */
 public abstract class Node {
     Node parent;
+    int depth; // only root has depth 0;
+    int distance;
     Set<Node> child;
     Set<_Predicate> predicates;
     _Operator operator;
@@ -29,7 +31,7 @@ public abstract class Node {
         for (Node node : getTrace()) {
             plan.add(node.operator);
         }
-        System.out.println("ObtainedPlanSize: "+plan.size());
+        // System.out.println("ObtainedPlanSize: "+plan.size());
         return plan;
     }
 
@@ -40,11 +42,15 @@ public abstract class Node {
     public Deque<Node> getTrace() {
         Deque<Node> deque = new LinkedList<>();
         Node n = this;
-        do {
-            deque.add(n);
-            n = n.parent;
-        } while (n.parent != null);
-        System.out.println("DequeSize: "+deque.size());
+        try {
+            do {
+                deque.add(n);
+                n = n.parent;
+            } while (n.parent != null);
+        }catch (NullPointerException ex){
+            // System.out.println(ex.getMessage());
+        }
+        // System.out.println("DequeSize: "+deque.size());
         return deque;
     }
 
@@ -57,5 +63,11 @@ public abstract class Node {
         return this.predicates;
     }
 
+    public int getDistance(){
+        return this.distance;
+    }
+    public int getDepth(){
+        return this.depth;
+    }
 
 }

@@ -7,6 +7,7 @@ import predicate.Predicate;
 public class Move extends Operator{
 
 	private Office o1, o2;
+	
 	/**
 	 * Robot moves from o1 to o2
 	 * Precondition: 		robot-location(o1), adjacent(o1,o2)
@@ -22,23 +23,24 @@ public class Move extends Operator{
 		init_pre();
 		init_add();
 		init_del();
+		super.name = "MOVE";
 	}
 	private void init_pre() {
 		Predicate rob_loc = new predicate.RobotLocation(o1);
-		this.list_preconditions.put(PreconditionName.ROBOTLOCATION, rob_loc);
+		this.list_preconditions.add(rob_loc);
 		
 		Predicate adj = new predicate.Adjacent(o1,o2);
-		this.list_preconditions.put(PreconditionName.ADJACENT, adj);
+		this.list_preconditions.add(adj);
 		
 	}
 	private void init_add() {
 		Predicate rob_loc = new predicate.RobotLocation(o2);
-		this.list_preconditions.put(PreconditionName.ROBOTLOCATION, rob_loc);
+		this.list_add.add(rob_loc);
 		
 	}
 	private void init_del() {
 		Predicate rob_loc = new predicate.RobotLocation(o1);
-		this.list_preconditions.put(PreconditionName.ROBOTLOCATION, rob_loc);
+		this.list_delete.add(rob_loc);
 		
 	}
 	
@@ -69,5 +71,7 @@ public class Move extends Operator{
 	public String toString(){
 		return "Move("+o1.id+","+o2.id+")";
 	}
-	
+	public String getName(){
+		return super.name;
+	}
 }

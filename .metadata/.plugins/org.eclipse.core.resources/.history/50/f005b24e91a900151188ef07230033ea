@@ -1,8 +1,0 @@
-package operator;
-
-public class CleanOffice {
-
-	public CleanOffice(Office o){
-		
-	}
-}

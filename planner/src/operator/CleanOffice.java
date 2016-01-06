@@ -1,6 +1,5 @@
 package operator;
 
-import constants.PreconditionName;
 import item.Office;
 import predicate.Predicate;
 
@@ -21,33 +20,34 @@ public class CleanOffice extends Operator{
 		init_pre();
 		init_add();
 		init_del();
+		super.name = "CLEAN-OFFICE";
 	}
 	
 	private void init_pre() {
 		Predicate rob_loc = new predicate.RobotLocation(o);
-		this.list_preconditions.put(PreconditionName.ROBOTLOCATION, rob_loc);
+		this.list_preconditions.add(rob_loc);
 		
 		Predicate dirt = new predicate.Dirty(o);
-		this.list_preconditions.put(PreconditionName.DIRTY, dirt);
+		this.list_preconditions.add(dirt);
 		
 		Predicate empt = new predicate.Empty(o);
-		this.list_preconditions.put(PreconditionName.EMPTY, empt);
+		this.list_preconditions.add(empt);
 	}
 
 	private void init_add() {
 		Predicate cln = new predicate.Clean(o);
-		this.list_add.put(PreconditionName.CLEAN, cln);		
+		this.list_add.add(cln);		
 	}
 	
 	private void init_del() {
 		Predicate drt = new predicate.Dirty(o);
-		this.list_delete.put(PreconditionName.DIRTY, drt);
+		this.list_delete.add(drt);
 	}
 
 	
 
 	/**
-	 * @return the o
+	 * @return the office to be cleaned
 	 */
 	public Office getO() {
 		return o;
@@ -62,6 +62,10 @@ public class CleanOffice extends Operator{
 
 	public String toString(){
 		return "Clean-office("+o.id+")";
+	}
+	
+	public String getName(){
+		return super.name;
 	}
 
 

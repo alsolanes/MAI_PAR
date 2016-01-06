@@ -14,7 +14,7 @@ import java.util.TreeSet;
 public class Move extends _Operator {
     Office office;
     Office nextOffice;
-    State parent;
+    public State parent;
 
     public Move(Office o1, Office o2, State parent) {
         super(parent.getPredicates());
@@ -92,17 +92,16 @@ public class Move extends _Operator {
         // its undo only if the previous
         _Operator op = this.parent.getOperator();
         if (op instanceof Move) {
-            //
             if ((((Move) op).nextOffice) == this.office) {
                 if (((Move) op).office == this.nextOffice) {
                     return true;
                 }
             }
-
         }
-
         return false;
     }
+
+
 
     public State apply() {
 

@@ -22,4 +22,9 @@ public class Adjacent extends Predicate {
 	public String toString() {
 		return "Adjacent("+o1.id+","+o2.id+")";
 	}
+
+	@Override
+	public Office getOffice() {
+		return o1;
+	}
 }

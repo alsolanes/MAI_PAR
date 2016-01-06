@@ -31,6 +31,7 @@ public class State extends Node {
     }
 
     public State(State s) {
+        this.depth = s.depth + 1;
         this.location = s.location;
         super.predicates = new HashSet<>(s.predicates);
         super.parent = s.parent;
@@ -39,6 +40,7 @@ public class State extends Node {
 
 
     public State(Office o, Set<_Predicate> lp, State parent, _Operator op) {
+        this.depth = parent.depth + 1;
         this.location = o; // robot location
         super.predicates = lp;
         super.parent = parent; // parent node
@@ -61,6 +63,7 @@ public class State extends Node {
 
 
     public State(List<String> config, Loader loader) {
+        this.depth = 0; // am the root!
         predicates = new TreeSet<>();
 
         for (String pred : config) {
@@ -109,6 +112,7 @@ public class State extends Node {
 
     public List<_Predicate> compareSetup(State goalState) {
         // replicate the current predicates
+
         List<String> tempCurr = new ArrayList<>(this.getState());
         tempCurr.removeAll(goalState.getState()); // remove all those that match with the goal
         List<_Predicate> result = new LinkedList<>();
@@ -120,6 +124,7 @@ public class State extends Node {
         if (this.bestMatch > result.size()) {
             this.bestMatch = result.size();
         }
+        this.distance = result.size();
         return result;
     }
 
@@ -136,12 +141,13 @@ public class State extends Node {
         return expansion;
     }
 
-    public State expand(State goalState, HashSet<State> history, Deque<State> currentDeque) {
+    public State expand(State goalState, HashSet<State> history, Deque<State> currentDeque, Deque<State> planDeque) {
         //System.out.println("@@@" + this.getState() + " --> " + this.operator);
-        //System.out.println("$$$" + goalState.getState() + " <-- ");
+        //System.out.println("@@@ --> " + this.getPlan() + " :: ");
+        //System.out.println("$$$" + this.getState() + " <-- ");
         //System.out.println("???" + goalState.compareSetup(this) + " ...");
-        boolean found = false;
-        List<_Predicate> diff_predicate = this.compareSetup(goalState); //
+        // boolean found = false;
+        // List<_Predicate> diff_predicate = this.compareSetup(goalState); //
         // list of predicates taht doesn't match
 
         // get current state robot location
@@ -175,52 +181,69 @@ public class State extends Node {
                     break;
                 case "Empty":
                     //
+
                     break;
                 default:
                     break;
             }
 
         }
-
-        //System.out.println(ops);
-
+        // print current iteration new operation candidates
+        // System.out.println(ops);
         // generate candidate states
         List<State> states = new LinkedList<>();
+
+
         for (_Operator op : ops) {
             //System.out.println(op.toString());
             State s = op.reverse();
             if (s == null) {
                 // no instance
                 this.skipMatch++;
-                //System.out.println("+++[" + op.toString() + "] \t+++ NULL");
+                // System.out.println("---[" + op.toString() + "] \t+++ NULL"); // no aplicable
             } else {
                 states.add(s);
             }
         }
 
-        // System.out.println();
-
+        // check if the state exists
         for (State s : states) {
             if (s instanceof State) { // is not null
                 // if is loop
                 if (history.add(s)) {
+
+                    s.compareSetup(goalState);
+
+                    if(planDeque.size() != 0){
+                        State plan  = planDeque.getLast(); // if plan exists
+                        if((plan).depth <= (s).depth + (s).distance){ // deth + distance?
+                          // this.depthOverextend
+
+                            continue;
+                        }
+                    }
+
                     currentDeque.add(s);
-                    int diff = s.compareSetup(goalState).size();
-                    if (diff == 0) {
-                        found = true;
-                        return s;
+                    // System.out.println(((State) s).operator.toString()); // print the operation that is not skipped
+
+
+                    if ((s).distance == 0) {
+                        planDeque.add(s); // this plan can reach the goal
+                        System.out.println(((State) s).depth);
+                        // found = true;
+                        //return s;
                     }
                     // can add
                     this.stateCounter++;
-                    //System.out.println("+++[" + s.operator.toString() + "] \t+++ ACK");
+                    //System.out.println("+++[" + s.operator.toString() + "]     \t+++ ACK");
                 } else {
                     // repeated
                     this.loopMatch++;
-                    //System.out.println("+++[" + s.operator.toString() + "] \t+++ LOOP");
+                    //System.out.println("---[" + s.operator.toString() + "] \t+++ LOOP");
                 }
             }
         }
-
+        // end expanding
         return null;
     }
 
@@ -310,7 +333,9 @@ public class State extends Node {
 
     @Override
     public boolean equals(Object obj) {
-        return this.hashCode() == obj.hashCode();
+        boolean b;
+        b = this.hashCode() == ((State)obj).hashCode();
+        return b;
     }
 
 }

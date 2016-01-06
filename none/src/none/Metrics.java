@@ -49,7 +49,7 @@ public class Metrics {
 
         String result = "";
         for(Long key: this.tracker.keySet()){
-            result += key +" \t" + this.tracker.get(key);
+            result += "\ntime: ["+key +"] \t - " + this.tracker.get(key);
         }
         return result;
     }
