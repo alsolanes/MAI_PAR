@@ -34,12 +34,14 @@ public class State {
 	public State(List<Predicate> conditions, ArrayList<Office> off_list) {
 		this.predicates = conditions;
 		this.offices = off_list;
+		getRobotPosition();
+		
 	}
 	
 	/**
 	 * @return the conditions
 	 */
-	public List<Predicate> getConditions() {
+	public List<Predicate> getPredicates() {
 		return predicates;
 	}
 
@@ -47,7 +49,7 @@ public class State {
 	 * @param conditions 
 	 * the conditions to set
 	 */
-	public void setConditions(List<Predicate> conditions) {
+	public void setPredicates(List<Predicate> conditions) {
 		this.predicates = conditions;
 	}
 
@@ -128,7 +130,7 @@ public class State {
 		List<Predicate> lst_prec = (List<Predicate>) op.getList_preconditions();
 		for(Predicate p : lst_prec){
 			// if the predicate is not in the list and it is not predicate Adjacent (which is not in the state list)
-			if(!st.getConditions().contains(p)){
+			if(!st.getPredicates().contains(p)){
 				if(!p.getName().contains(PreconditionName.ADJACENT))					
 					return false;
 			} 
@@ -182,7 +184,7 @@ public class State {
 		List<Predicate> lst_add = (List<Predicate>) op.getList_add();
 		// check whether the state contains each of the predicates of the add list
 		for(Predicate p : lst_add){
-			if(!st.getConditions().contains(p)){
+			if(!st.getPredicates().contains(p)){
 				return false;
 			}
 		}
@@ -304,5 +306,23 @@ public class State {
 		
 		
 		return out;
+	}
+	
+	public boolean robotAtDirty(){
+		Dirty d = new Dirty(robotPosition);
+		return this.predicates.contains(d);
+	}
+	
+	public BoxLocation robotAtBox(){
+		for(BoxLocation bl : getBoxes()){
+			if(bl.getOffice().equals(robotPosition))
+				return bl;
+		}
+		return null;
+	}
+	
+	public boolean robotAtEmpty(){
+		Empty e = new Empty(robotPosition);
+		return this.predicates.contains(e);
 	}
 }

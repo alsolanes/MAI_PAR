@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Queue;
 
 import operator.Operator;
+import predicate.Dirty;
 import predicate.Predicate;
 import state.State;
 
@@ -42,5 +43,27 @@ public class RegressionPlanner {
 		return null;
 	}
 	
-	
+	public int getValueState(State a){
+		int out = 0;
+		//Check if the robot is at a dirty place
+		Dirty d = new Dirty(a.getRobotPosition());
+		if(a.robotAtDirty()){
+			out += 1;
+			if(a.robotAtEmpty())
+				out += 2;
+			else
+				out += 1;
+		}
+		out += getDiffValState(a, this.goal_state);
+		
+		return out;
+		
+	}
+	// Returns the number of similar predicates between two states
+	public int getDiffValState(State a, State b){
+		ArrayList<Predicate> sim = (ArrayList<Predicate>) a.getPredicates();
+		sim.retainAll(b.getPredicates());
+		//System.out.println(sim);
+		return sim.size();
+	}
 }

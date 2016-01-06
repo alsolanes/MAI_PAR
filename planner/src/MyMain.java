@@ -29,6 +29,12 @@ public class MyMain {
 		
 		State tmp = new State(loader.getInitialState(), (ArrayList<Office>)loader.getOffices());
 		
+		loader.load("config_example2.txt");
+		
+		State tmp2 = new State(loader.getInitialState(), (ArrayList<Office>)loader.getOffices());
+		
+		RegressionPlanner r = new RegressionPlanner(loader.getState_Initial(), loader.getState_Goal());
+		System.out.println(r.getValueState(tmp));
 		//Operator op = new Move(loader.getOffice("o4"), loader.getOffice("o5"));
 		//Operator op = new Push(loader.getBox("A"),loader.getOffice("o5"),loader.getOffice("o2"));
 		/*Operator op = new CleanOffice(loader.getOffice("o1"));

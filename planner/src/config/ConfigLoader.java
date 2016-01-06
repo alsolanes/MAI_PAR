@@ -39,7 +39,7 @@ public class ConfigLoader {
 	}
 	
 	public void load(String file){
-		this.file_path += file;
+		this.file_path = System.getProperty("user.dir") + "/src/config/"+file;
 		System.out.println("loading...");
 		config = this.loadConfFile();
 		this.offices = (ArrayList<Office>) getOffices();
@@ -47,6 +47,16 @@ public class ConfigLoader {
 		this.initialState_list = (ArrayList<Predicate>) getInitialState();
 		this.goalState_list = (ArrayList<Predicate>) getGoalState();
 		System.out.println("Correctly loaded.");
+	}
+	
+	public State getState_Initial(){
+		State out = new State(this.initialState_list,this.offices);
+		return out;
+	}
+	
+	public State getState_Goal(){
+		State out = new State(this.goalState_list, this.offices);
+		return out;
 	}
 	
 	/**
