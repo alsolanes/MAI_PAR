@@ -34,7 +34,7 @@ public class MyMain {
 			loader.load(file_name);
 			
 			State tmp = new State(loader.getInitialState(), (ArrayList<Office>)loader.getOffices());
-			System.out.println(tmp.printState());
+			
 			RegressionPlanner r = new RegressionPlanner(loader.getState_Initial(), loader.getState_Goal());
 
 			

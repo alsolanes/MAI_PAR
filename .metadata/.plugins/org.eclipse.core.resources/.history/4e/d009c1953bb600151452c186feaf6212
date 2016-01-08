@@ -365,19 +365,4 @@ public class State {
 		return out;
 	}
 	
-	public String printState(){
-		String out = "|";
-		for(Office a: this.getOffices()){
-			if(a.position==4 || a.position==7) out+="\n------\t|------\t|------\n|";
-			ArrayList<Predicate> items = this.getPredicatesOffice(a.id);
-			for(Predicate p : items){
-				if(!p.getName().contains("ADJACENT")){
-					out+=p.getName().substring(0, 1);
-				}
-			}
-			out+="\t|";
-		}
-		return out;
-	}
-	
 }

@@ -368,7 +368,7 @@ public class State {
 	public String printState(){
 		String out = "|";
 		for(Office a: this.getOffices()){
-			if(a.position==4 || a.position==7) out+="\n------\t|------\t|------\n|";
+			if(a.position==4 || a.position==7) out+="\n|";
 			ArrayList<Predicate> items = this.getPredicatesOffice(a.id);
 			for(Predicate p : items){
 				if(!p.getName().contains("ADJACENT")){
