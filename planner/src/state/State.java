@@ -35,7 +35,6 @@ public class State {
 		this.predicates = conditions;
 		this.offices = off_list;
 		getRobotPosition();
-		
 	}
 	
 	/**
@@ -81,6 +80,29 @@ public class State {
 	public void setNextState(State nextState) {
 		this.nextState = nextState;
 	}
+	
+	
+
+	/**
+	 * @return the offices
+	 */
+	public ArrayList<Office> getOffices() {
+		return offices;
+	}
+
+	/**
+	 * @param offices the offices to set
+	 */
+	public void setOffices(ArrayList<Office> offices) {
+		this.offices = offices;
+	}
+
+	/**
+	 * @param robotPosition the robotPosition to set
+	 */
+	public void setRobotPosition(Office robotPosition) {
+		this.robotPosition = robotPosition;
+	}
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
@@ -100,20 +122,11 @@ public class State {
 	 */
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		State other = (State) obj;
-		
-		if (predicates == null) {
-			if (other.predicates != null)
+		State p2 = (State) obj;
+		for(Predicate p : p2.getPredicates()){
+			if(!this.getPredicates().contains(p))
 				return false;
-		} else if (!predicates.equals(other.predicates))
-			return false;
-		
+		}
 		return true;
 	}
 	
@@ -243,6 +256,18 @@ public class State {
 		return b;
 	}
 	
+	public Office getBoxOffice(Box b){
+		for(Predicate p:predicates){
+			if(p.getName().contains(PreconditionName.BOXLOCATION)){
+				BoxLocation bl = (BoxLocation) p;
+				if(bl.getBox().equals(b)){
+					return bl.getOffice();
+				}
+			}
+		}
+		return null;
+	}
+	
 	public ArrayList<Office> getAdjacentOffices(){
 		getRobotPosition();
 		ArrayList<Office> adj = new ArrayList<Office>();
@@ -309,11 +334,14 @@ public class State {
 	}
 	
 	public boolean robotAtDirty(){
+		//System.out.println("Checking off:"+robotPosition.toString());
+		getRobotPosition();
 		Dirty d = new Dirty(robotPosition);
 		return this.predicates.contains(d);
 	}
 	
 	public BoxLocation robotAtBox(){
+		getRobotPosition();
 		for(BoxLocation bl : getBoxes()){
 			if(bl.getOffice().equals(robotPosition))
 				return bl;
@@ -325,4 +353,16 @@ public class State {
 		Empty e = new Empty(robotPosition);
 		return this.predicates.contains(e);
 	}
+	
+	public State copyState(){
+		ArrayList<Predicate> p = new ArrayList<Predicate>();
+		ArrayList<Predicate> p_2 = (ArrayList<Predicate>) this.getPredicates();
+		p = (ArrayList<Predicate>) p_2.clone();
+		ArrayList<Office> o = new ArrayList<Office>();
+		ArrayList<Office> o_2 = (ArrayList<Office>) this.getOffices();
+		o = (ArrayList<Office>) o_2.clone();
+		State out = new State(p,o);
+		return out;
+	}
+	
 }

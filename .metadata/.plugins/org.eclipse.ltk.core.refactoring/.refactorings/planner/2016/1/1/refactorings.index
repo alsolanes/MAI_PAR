@@ -1,2 +1,6 @@
 1451922311100	Rename field 'initialState'
 1451922328727	Rename field 'goalState'
+1452257336245	Delete element
+1452257346819	Delete element
+1452257434272	Delete element
+1452259978347	Encapsulate field 'parent_node'

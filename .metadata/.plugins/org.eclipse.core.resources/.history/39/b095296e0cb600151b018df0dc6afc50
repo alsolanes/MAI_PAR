@@ -1,0 +1,99 @@
+package state;
+
+import java.util.ArrayList;
+
+import operator.Operator;
+
+public class Node {
+	private State current_state, parent_state;
+	private ArrayList<State> history_state;
+	private Operator current_operator;
+	private Node parent_node;
+	private int depth;
+	
+	public Node(State curr_state, ArrayList<State> history_state, Operator curr_operator, int depth){
+		this.current_operator = curr_operator;
+		this.current_state = curr_state;
+		this.history_state = history_state;
+		this.depth = depth;
+	}
+
+	/**
+	 * @return the current_state
+	 */
+	public State getCurrent_state() {
+		return current_state;
+	}
+
+	/**
+	 * @param current_state the current_state to set
+	 */
+	public void setCurrent_state(State current_state) {
+		this.current_state = current_state;
+	}
+
+	/**
+	 * @return the parent_state
+	 */
+	public State getParent_state() {
+		return parent_state;
+	}
+
+	/**
+	 * @param parent_state the parent_state to set
+	 */
+	public void setParent_state(State parent_state) {
+		this.parent_state = parent_state;
+	}
+
+	/**
+	 * @return the history_state
+	 */
+	public ArrayList<State> getHistory_state() {
+		return history_state;
+	}
+
+	/**
+	 * @param history_state the history_state to set
+	 */
+	public void setHistory_state(ArrayList<State> history_state) {
+		this.history_state = history_state;
+	}
+
+	/**
+	 * @return the current_operator
+	 */
+	public Operator getCurrent_operator() {
+		return current_operator;
+	}
+
+	/**
+	 * @param current_operator the current_operator to set
+	 */
+	public void setCurrent_operator(Operator current_operator) {
+		this.current_operator = current_operator;
+	}
+
+	/**
+	 * @return the depth
+	 */
+	public int getDepth() {
+		return depth;
+	}
+
+	/**
+	 * @param depth the depth to set
+	 */
+	public void setDepth(int depth) {
+		this.depth = depth;
+	}
+
+	public Node getParent_node() {
+		return parent_node;
+	}
+
+	public void setParent_node(Node parent_node) {
+		this.parent_node = parent_node;
+	}
+	
+}

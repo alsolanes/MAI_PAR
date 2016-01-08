@@ -1,16 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <qualifiedTypeNameHistroy>
-<fullyQualifiedTypeName name="java.util.ArrayList"/>
-<fullyQualifiedTypeName name="java.lang.System"/>
 <fullyQualifiedTypeName name="java.util.Set"/>
 <fullyQualifiedTypeName name="java.util.Map"/>
-<fullyQualifiedTypeName name="operator.Operator"/>
 <fullyQualifiedTypeName name="java.awt.List"/>
 <fullyQualifiedTypeName name="java.util.HashMap"/>
 <fullyQualifiedTypeName name="predicate.RobotLocation"/>
 <fullyQualifiedTypeName name="predicate.Predicate"/>
 <fullyQualifiedTypeName name="predicate.Adjacent"/>
-<fullyQualifiedTypeName name="operator.Move"/>
 <fullyQualifiedTypeName name="operator.Push"/>
 <fullyQualifiedTypeName name="item.Office"/>
 <fullyQualifiedTypeName name="state.State"/>
@@ -22,4 +18,10 @@
 <fullyQualifiedTypeName name="predicate.BoxLocation"/>
 <fullyQualifiedTypeName name="predicate.Dirty"/>
 <fullyQualifiedTypeName name="RegressionPlanner"/>
+<fullyQualifiedTypeName name="java.lang.System"/>
+<fullyQualifiedTypeName name="operator.Move"/>
+<fullyQualifiedTypeName name="java.util.ArrayList"/>
+<fullyQualifiedTypeName name="operator.Operator"/>
+<fullyQualifiedTypeName name="state.Node"/>
+<fullyQualifiedTypeName name="java.util.Collections"/>
 </qualifiedTypeNameHistroy>

@@ -1,0 +1,11 @@
+package state;
+
+import java.util.ArrayList;
+
+import operator.Operator;
+
+public class Node {
+	private State current_state;
+	private ArrayList<State> history_state;
+	private Operator current_operator;
+}

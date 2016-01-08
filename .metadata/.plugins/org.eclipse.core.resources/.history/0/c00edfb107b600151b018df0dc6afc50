@@ -1,0 +1,17 @@
+package state;
+
+import java.util.ArrayList;
+
+import operator.Operator;
+
+public class Node {
+	private State current_state;
+	private ArrayList<State> history_state;
+	private Operator current_operator;
+	
+	public Node(State curr_state, ArrayList<State> history_state, Operator curr_operator){
+		this.current_operator = curr_operator;
+		this.current_state = curr_state;
+		this.history_state = history_state;
+	}
+}
