@@ -32,7 +32,10 @@ public class Empty extends Predicate {
 	}
 
 	public String toString() {
-		return "Empty("+o.id+")";
+		String o1 = null;
+		if(o!=null)
+			o1=o.id;
+		return "Empty("+o1+")";
 	}
 
 	

@@ -28,29 +28,31 @@ public class Push extends Operator{
 		init_del();
 		super.name = "PUSH";
 	}
+	
 	private void init_pre() {
+		Predicate empt = new predicate.Empty(o2);
+		this.list_preconditions.add(empt);
+		
 		Predicate rob_loc = new predicate.RobotLocation(o1);
 		this.list_preconditions.add(rob_loc);
 		
 		Predicate box_loc = new predicate.BoxLocation(b,o1);
-		this.list_preconditions.add(box_loc);
+		this.list_preconditions.add(box_loc);			
 		
 		Predicate adj = new predicate.Adjacent(o1,o2);
 		this.list_preconditions.add(adj);
-		
-		Predicate empt = new predicate.Empty(o2);
-		this.list_preconditions.add(empt);
 	}
 	
 	private void init_add() {
+		Predicate empt = new predicate.Empty(o1);
+		this.list_add.add(empt);
+		
 		Predicate box_loc = new predicate.BoxLocation(b,o2);
 		this.list_add.add(box_loc);
 		
 		Predicate rob_loc = new predicate.RobotLocation(o2);
 		this.list_add.add(rob_loc);
 		
-		Predicate empt = new predicate.Empty(o1);
-		this.list_add.add(empt);
 	}
 	
 	private void init_del() {
@@ -102,9 +104,30 @@ public class Push extends Operator{
 		this.o2 = o2;
 	}
 	public String toString(){
-		return "Push("+b.id+","+o1.id+","+o2.id+")";
+		String of1 = "null";
+	    String of2 = "null";
+	    String b1 = "null";
+	    if(b!=null){
+	    	b1 = b.id;
+	    }
+	    if(o1!=null){
+	    	of1 = o1.id;
+	    }
+	    if(o2!=null){
+	    	of2 = o2.id;
+	    }
+		return "Push("+b1+","+of1+","+of2+")";
 	}
 	public String getName(){
 		return super.name;
+	}
+	public boolean isPartial(){
+		if(this.getO1()==null)
+			return true;
+		if(this.getO2()==null)
+			return true;
+		if(this.getB()==null)
+			return true;
+		else return false;
 	}
 }

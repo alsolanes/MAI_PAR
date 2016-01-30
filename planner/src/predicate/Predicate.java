@@ -14,9 +14,10 @@ public abstract class Predicate {
 
 	protected String name = "";
 	public Office affectedOffice;
+	private boolean partiallyInstanced;
 	
 	public Predicate(){
-		
+		partiallyInstanced=false;
 	}
 	
 	public String getName() {
@@ -31,5 +32,13 @@ public abstract class Predicate {
 	public Office getOffice() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	public boolean isPartiallyInstanced() {
+		return partiallyInstanced;
+	}
+
+	public void setPartiallyInstanced(boolean partiallyInstanced) {
+		this.partiallyInstanced = partiallyInstanced;
 	}
 }

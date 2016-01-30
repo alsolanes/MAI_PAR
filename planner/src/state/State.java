@@ -1,6 +1,7 @@
 package state;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -215,6 +216,14 @@ public class State {
 		}
 	}
 	
+	public boolean robotOnBox(){
+		for(BoxLocation bl : this.getBoxes()){
+			if(bl.getOffice().equals(robotPosition))
+				return true;
+		}
+		return false;
+	}
+	
 	/**
 	 * Delete predicates of the conditions list
 	 */
@@ -263,6 +272,15 @@ public class State {
 				if(bl.getBox().equals(b)){
 					return bl.getOffice();
 				}
+			}
+		}
+		return null;
+	}
+	public Box getOfficeBox(String o){
+		for(Predicate p: this.getPredicatesOffice(o)){
+			if(p.getName().contains("BOX")){
+				BoxLocation bl = (BoxLocation) p;
+				return bl.getBox();
 			}
 		}
 		return null;
@@ -379,5 +397,49 @@ public class State {
 		}
 		return out;
 	}
+	public Office getOffice(int position){
+		for(Office o : offices){
+			if(o.position==position)
+				return o;
+		}
+		return null;
+	}
+	
+	public ArrayList<Office> getAdjacentOffices(Office o){
+		ArrayList<Office> out = new ArrayList<Office>();
+		for(int o1 : o.adjacent_list){
+			out.add(this.getOffice(o1));
+		}
+		return out;
+	}
+	/**
+	 * Checks whether an office is empty or not
+	 * @param o
+	 * @return
+	 */
+	public boolean isEmpty(Office o){
+		Empty e = new Empty(o);
+		for(Predicate p : this.predicates){
+			if(e.equals(p)){
+				return true;
+			}
+		}
+		return false;
+	}
+	/**
+	 * Checks whether an office is clean or not
+	 * @param o
+	 * @return
+	 */
+	public boolean isClean(Office o){
+		Clean c = new Clean(o);
+		for(Predicate p : this.predicates){
+			if(c.equals(p)){
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	
 }

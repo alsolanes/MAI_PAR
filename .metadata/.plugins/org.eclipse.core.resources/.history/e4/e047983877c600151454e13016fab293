@@ -1,0 +1,122 @@
+package operator;
+
+import constants.PreconditionName;
+import item.Box;
+import item.Office;
+import predicate.Predicate;
+
+public class Push extends Operator{
+
+	private Box b;
+	private Office o1, o2;
+	/**
+	 * Robot pushes box b from o1 to o2
+	 * Pre: robot-location(o1), box-location(b,o1), adjacent(o1,o2), empty(o2)
+	 * Add: box-location(b,o2), robot-location(o2), empty(o1)
+	 * Del: empty(o2), box-location(b,o1), robot-location(o1)
+	 * @param b
+	 * @param o1
+	 * @param o2
+	 */
+	public Push(Box b, Office o1, Office o2){
+		super();
+		this.b = b;
+		this.o1 = o1;
+		this.o2 = o2;
+		init_pre();
+		init_add();
+		init_del();
+		super.name = "PUSH";
+	}
+	private void init_pre() {
+		Predicate rob_loc = new predicate.RobotLocation(o1);
+		this.list_preconditions.add(rob_loc);
+		
+		Predicate box_loc = new predicate.BoxLocation(b,o1);
+		this.list_preconditions.add(box_loc);
+		
+		Predicate adj = new predicate.Adjacent(o1,o2);
+		this.list_preconditions.add(adj);
+		
+		Predicate empt = new predicate.Empty(o2);
+		this.list_preconditions.add(empt);
+	}
+	
+	private void init_add() {
+		Predicate box_loc = new predicate.BoxLocation(b,o2);
+		this.list_add.add(box_loc);
+		
+		Predicate rob_loc = new predicate.RobotLocation(o2);
+		this.list_add.add(rob_loc);
+		
+		Predicate empt = new predicate.Empty(o1);
+		this.list_add.add(empt);
+	}
+	
+	private void init_del() {
+		Predicate empt = new predicate.Empty(o2);
+		this.list_delete.add(empt);
+		
+		Predicate box_loc = new predicate.BoxLocation(b,o1);
+		this.list_delete.add(box_loc);
+		
+		Predicate rob_loc = new predicate.RobotLocation(o1);
+		this.list_delete.add(rob_loc);
+	}
+	
+	
+	/**
+	 * @return the b
+	 */
+	public Box getB() {
+		return b;
+	}
+	/**
+	 * @param b the b to set
+	 */
+	public void setB(Box b) {
+		this.b = b;
+	}
+	/**
+	 * @return the o1
+	 */
+	public Office getO1() {
+		return o1;
+	}
+	/**
+	 * @param o1 the o1 to set
+	 */
+	public void setO1(Office o1) {
+		this.o1 = o1;
+	}
+	/**
+	 * @return the o2
+	 */
+	public Office getO2() {
+		return o2;
+	}
+	/**
+	 * @param o2 the o2 to set
+	 */
+	public void setO2(Office o2) {
+		this.o2 = o2;
+	}
+	public String toString(){
+		String of1 = "null";
+	    String of2 = "null";
+	    String b1 = "null";
+	    if(b.id!=null){
+	    	b1 = b.id;
+	    }
+	    if(o1.id!=null){
+	    	of1 = o1.id;
+	    }
+	    if(o2.id!=null){
+	    	of2 = o2.id;
+	    }
+		return "Push("+b1+","+of1+","+of2+")";
+	}
+	public String getName(){
+		return super.name;
+	}
+}

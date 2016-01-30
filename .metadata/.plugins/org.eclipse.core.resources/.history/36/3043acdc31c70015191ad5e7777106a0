@@ -1,0 +1,825 @@
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Random;
+
+import constants.PreconditionName;
+import item.Box;
+import item.Office;
+import operator.CleanOffice;
+import operator.Move;
+import operator.Operator;
+import operator.Push;
+import predicate.Adjacent;
+import predicate.BoxLocation;
+import predicate.Clean;
+import predicate.Dirty;
+import predicate.Empty;
+import predicate.Predicate;
+import predicate.PredicateList;
+import predicate.RobotLocation;
+import state.Node;
+import state.State;
+
+/** 
+ * This planner will begin from the goal and go backwards until achives the initial state.
+ * This option, will consider goal stack planning and protective achieved goals to prevent errors.
+ */
+
+/**
+ * @author Aleix
+ *
+ */
+public class Planner {
+	State init_state, goal_state, curr_state;
+	ArrayList<Operator> operator_solution;
+	Operator curr_operator;
+	ArrayList<State> state_solution;
+	ArrayList<Node> nodes;
+	//goal stack planning variables
+	LinkedList<Object> goal_stack;
+
+
+	/**
+	 * Initialize the variables
+	 * @param init
+	 * @param goal
+	 */
+	public Planner(State init, State goal){
+		init_state = init;
+		goal_state = goal;
+		operator_solution = new ArrayList<Operator>();
+		state_solution = new ArrayList<State>();
+		nodes = new ArrayList<Node>();
+		goal_stack = new LinkedList<Object>();
+		// add the Clean predicates to the result to simplify the process
+		addCleanResult();
+	}
+
+	/**
+	 * The main algorithm
+	 */
+	public void execute_goalstack_planner(){
+		//1. Initialize Database by the Initial State
+		this.curr_state = this.init_state.copyState();
+		//2. Initialize the Planning Action list
+		this.operator_solution = new ArrayList<Operator>();
+		//3. Add goal to the goal stack (treated as a predicates list)
+		ArrayList<Predicate> sortedGoal = this.sortedPredicates();
+		goal_stack.addLast(sortedGoal);
+		//   Add each single predicate to the stack
+		for(Predicate p:sortedGoal){
+			goal_stack.addLast(p);
+		}
+		boolean success = false;
+		//   Loop
+		while(!success){
+			// 4. If the top of the stack is a condition satisfied by the current state,
+			//    remove it from the goal stack and go to #7
+			if(goal_stack.getLast() instanceof Predicate){
+				Predicate p = (Predicate) goal_stack.getLast();
+				if(this.curr_state.getPredicates().contains(goal_stack.getLast())){
+					goal_stack.removeLast();
+				}
+				else if(p instanceof Adjacent){
+					Adjacent pAux = (Adjacent) p;
+					if(pAux.getOffice1()==null){
+						//find best adjacent empty
+					}else if(pAux.getOffice2()==null){
+						
+					}
+					if(pAux.getOffice1().is_adjacent(pAux.getOffice2())){
+						goal_stack.removeLast();
+					}else{
+						System.out.println("ERROR FOUND ON ADJACENCY CONDITION"+pAux.toString());
+					}
+				}
+				// 5. If the top of the Stack is a condition not 
+				//    satisfied by the current state, replace it 
+				//    by the action (whose add list will satisfy this condition)
+				//    and add preconditions of the action to the Goal Stack.
+				else{
+					// there can be two cases: totally instanced and partially instanced
+					// check the action that can reach this condition
+					this.curr_operator=this.getVerifyingAction(p);
+					if(this.curr_operator!=null){
+						System.out.println(this.curr_operator.toString());
+						this.goal_stack.add(curr_operator);
+						this.goal_stack.add(this.curr_operator.getList_preconditions());
+						for(Predicate q : (ArrayList<Predicate>)this.curr_operator.getList_preconditions())
+							this.goal_stack.add(q);
+					}
+				}
+				// 6.  If the top of the Goal Stack is the action (whose preconditions are satisfied)
+				//     then remove it from the goal stack and add it to the planning action list. Insert
+				//     "Add Conditions" of the action to the current state. Remove "Delete Conditions" of
+				//     the action from the current state.
+			} else if(goal_stack.getLast() instanceof Operator){
+				curr_operator = (Operator) goal_stack.getLast();
+				if(this.curr_state.isValidOperator(curr_operator, this.curr_state)){
+					curr_state=generateNextState(curr_state, curr_operator);
+					operator_solution.add(curr_operator);
+					goal_stack.removeLast();
+				} else{
+					System.out.println("Error: invalid operator in the goal_stack");
+				}
+			} else if(goal_stack.getLast() instanceof ArrayList){
+				// verify individually each predicate in the predicateList list
+				// check each condition, if any of them not satisfied
+				boolean find = true;
+				for(Predicate prd : (ArrayList<Predicate>)goal_stack.getLast()){
+					if(prd.getName().contains("ADJACENT"))
+						find=true;
+					else if(!this.curr_state.getPredicates().contains(prd))
+						find = false;
+				}
+				// if all found remove it
+				if(find){
+					this.goal_stack.removeLast();
+				} else{
+					// if not all found, add them individually
+					for(Predicate prd : (ArrayList<Predicate>)goal_stack.getLast()){
+						this.goal_stack.add(prd);
+					}
+				}
+			}
+			// 7.  If the goal stack is not empty, then go to step 4, else planning action list contains
+			//     the plan to achieve the goal
+			if(goal_stack.isEmpty())
+				success = true;
+		}
+
+	}
+
+	/**
+	 * Returns the operator that best verifies the predicate, the function is called only if it is not satisfied
+	 * So, this function will calculate the best action
+	 */
+	public Operator getVerifyingAction(Predicate p){
+		Operator out = null;
+		// Check which operator verifies the predicate p
+		// this means, that we will look for an operator that has this predicate
+		// in the add list.
+
+
+		//-----------------------------------CLEAN----------------------------------------------------//
+
+		// cast the predicate to the concrete predicate type and check which operator best suits
+		if(p.getName().contains(PreconditionName.CLEAN)){
+			Clean p1 = (Clean) p;
+			// can be achieved by CLEAN
+			return new CleanOffice(p.getOffice());
+
+			//--------------------------------BOXLOCATION------------------------------------------------//
+
+		}else if(p.getName().contains(PreconditionName.BOXLOCATION)){
+			// can be achieved by PUSH
+			BoxLocation p1 = (BoxLocation) p;
+			Box b = p1.getBox();
+			Office of1 = p1.getOffice();
+			Office of2 = null;
+			//if no box, look if there is a box in the specified office
+			if(p1.getBox()==null){
+				if(this.curr_state.getOfficeBox(p1.getOffice().id)!=null){
+					b=this.curr_state.getOfficeBox(p1.getOffice().id);
+				}else{
+					//return a box from the surroundings
+					for(Office oAux : this.curr_state.getAdjacentOffices(p1.getOffice())){
+						Box auxBox = this.curr_state.getOfficeBox(oAux.id);
+						if(auxBox!=null){
+							b = auxBox;
+						}
+					}
+					if(b==null){
+						b = this.curr_state.getBoxes().get(0).getBox();
+					}
+				}
+				
+				// propagate the results
+				propagate(b);
+				return null;
+			}
+			if(p1.getOffice()==null){
+				of1 = this.curr_state.getBoxOffice(p1.getBox());
+				//propagate the results
+				propagate(of1);
+				return null;
+			}
+			//look to where can move
+			if(this.goal_state.getBoxOffice(b).is_adjacent(this.curr_state.getBoxOffice(b))){
+				//if the goal position is adjacent
+				of2 = this.goal_state.getBoxOffice(b);
+			}else{
+				//if the goal position is not adjacent, push to a near position
+				for(Office o1:this.curr_state.getAdjacentOffices(this.curr_state.getBoxOffice(b))){
+					for(Office o2:this.goal_state.getAdjacentOffices(this.goal_state.getBoxOffice(b))){
+						if(o1.is_adjacent(o2)){
+							of2=o1;
+						}
+					}
+				}
+			}
+			return new Push(b,of1,of2);
+
+			//-----------------------------------ADJACENT---------------------------------------------------//
+
+
+		}else if(p.getName().contains(PreconditionName.ADJACENT)){
+			// can be achieved by PUSH
+			//Adjacent p1 = (Adjacent) p;
+			return null;
+
+			//-----------------------------------EMPTY---------------------------------------------------//
+
+
+		}else if(p.getName().contains(PreconditionName.EMPTY)){
+			// can be achieved by PUSH
+			Empty p1 = (Empty) p;
+			
+			for(BoxLocation bl : this.curr_state.getBoxes()){
+				//check whether the office has a box or not
+				if(bl.getOffice().equals(p.getOffice())){
+					//if the end goal box location is adjacent return the push to the final position
+					if(this.getGoal_state().getBoxOffice(bl.getBox()).is_adjacent(p.getOffice())){
+						return new Push(bl.getBox(),p.getOffice(),this.getGoal_state().getBoxOffice(bl.getBox()));
+					} else{
+						return new Push(bl.getBox(),p.getOffice(),null);
+					}
+				}
+			}
+			return new Push(null,p1.getO(),null);
+			// check whether can be verified, if not, partially instanced will be applied
+			//-------------------------------ROBOTLOCATION-----------------------------------------------//
+
+		}else if(p.getName().contains(PreconditionName.ROBOTLOCATION)){
+			// can be achieved by PUSH or MOVE
+			RobotLocation p1 = (RobotLocation) p;
+			//mirar estat actual per saber quin triar
+			// en cas que estigui adjacent....
+			if(p1.getOffice()!=null){
+				if(p1.getOffice().is_adjacent(this.curr_state.getRobotPosition())){
+					//mirarem si podem de passada moure un element, si podem, ho fem: PUSH
+					if(this.curr_state.robotOnBox()){
+						//if on box and the objective is to move to a place where the box must be
+						if(this.goal_state.getOfficeBox(this.curr_state.getRobotPosition().id).equals(p1.getOffice()))
+							return new Push(this.curr_state.getOfficeBox(this.curr_state.getRobotPosition().id),this.curr_state.getRobotPosition(),p1.getOffice());
+						else{
+							//no push necessary
+							return new Move(this.curr_state.getRobotPosition(),p1.getOffice());
+
+						}
+
+					}else{
+						return new Move(this.curr_state.getRobotPosition(), p1.getOffice());
+					}
+
+					//si no podem push, movem robot: MOVE
+				} else{
+					// suposarem un move desde adjacent
+					if(p1.getOffice()==null)
+						System.out.println("Error office");
+					else if(this.curr_state.getRobotPosition()==null)
+						System.out.println("No robot position");
+					Office of1=this.best_adjacent(p1.getOffice(), this.curr_state.getRobotPosition());
+					return new Move(of1,p1.getOffice());
+				}
+			}else{
+				//parcialment instanciat, llavors calcular posició
+				// trobar valor a robot location i propagar
+				Office of1 = this.curr_state.getRobotPosition();
+				propagate(of1);
+				System.out.println("RobotLocation unknown...");
+				
+			}
+			//return new Push();
+		}
+		return out;
+	}
+
+	public Office best_adjacent(Office o1, Office o2){
+		if(o1.is_adjacent(o2)){
+			return o2;
+		}
+		for(Office of1:this.curr_state.getAdjacentOffices(o1)){
+			for(Office of2:this.goal_state.getAdjacentOffices(o2)){
+				if(of1.is_adjacent(of2))
+					return of2;
+			}
+		}
+		return randOffice(this.curr_state.getAdjacentOffices());
+	}
+	
+	public Office best_adjacentEmpty(Office o1){
+		for(Office of1:this.curr_state.getAdjacentOffices(o1)){
+			if(of1.is_adjacent(o1)&&this.curr_state.isEmpty(of1))
+				return of2;
+
+		}
+		return randOffice(this.curr_state.getAdjacentOffices());
+	}
+
+	public void propagate(Object p1){
+		if(p1 instanceof Office){
+			for(int i=this.goal_stack.size()-1;i>=0;i--){
+				Object o = this.goal_stack.get(i);
+				// case operator
+				if(o instanceof Operator){
+					Operator o1 = (Operator) o;
+					if(o1.isPartial()){
+						if(o1 instanceof CleanOffice){
+							CleanOffice co = (CleanOffice) o1;
+							if(co.getO()==null)
+								this.goal_stack.set(i, new CleanOffice((Office)p1));
+						}else if(o1 instanceof Move){
+							Move m = (Move)o1;
+							if(m.getO1()==null){
+								this.goal_stack.set(i, new Move((Office)p1, m.getO2()));
+							} else if (m.getO2()==null){
+								this.goal_stack.set(i,new Move(m.getO1(),(Office)p1));
+							}
+						}else if(o1 instanceof Push){
+							Push m = (Push)o1;
+							if(m.getO1()==null){
+								this.goal_stack.set(i, new Push(m.getB(),(Office)p1, m.getO2()));
+							} else if (m.getO2()==null){
+								this.goal_stack.set(i,new Push(m.getB(),m.getO1(),(Office)p1));
+							}
+						}
+					}
+					break;
+					// case predicate
+				}else if(o instanceof Predicate){
+					Predicate o1 = (Predicate) o;
+					if(o1 instanceof Adjacent){
+						//Adjacent p1 = (Adjacent) o;
+						
+					}else if(o1 instanceof BoxLocation){
+						BoxLocation p2 = (BoxLocation) o;
+						if(p2.getOffice()==null)
+							this.goal_stack.set(i, new BoxLocation(p2.getBox(),(Office)p1));
+					}else if(o1 instanceof Clean){
+						Clean c = (Clean) o1;
+						if(c.getOffice()==null)
+							this.goal_stack.set(i, new Clean((Office)p1));
+					}else if(o1 instanceof Dirty){
+						Dirty d = (Dirty) o1;
+						if(d.getOffice()==null)
+							this.goal_stack.set(i, new Dirty((Office)p1));
+					}else if(o1 instanceof Empty){
+						Empty e = (Empty) o1;
+						if(e.getO()==null)
+							this.goal_stack.set(i, new Empty((Office)p1));
+					}else if(o1 instanceof RobotLocation){
+						RobotLocation rl = (RobotLocation) o1;
+						if(rl.getOffice()==null)
+							this.goal_stack.set(i, new RobotLocation((Office)p1));
+					}
+					//case arraylist
+				}else if(o instanceof ArrayList){
+					ArrayList<Predicate> plist = (ArrayList<Predicate>) o;
+					for(int j=0;i<plist.size();j++){
+						Predicate o1 = (Predicate) plist.get(j);
+						if(o1 instanceof Adjacent){
+							//Adjacent p1 = (Adjacent) o;
+						}else if(o1 instanceof BoxLocation){
+							BoxLocation p2 = (BoxLocation) o1;
+							if(p2.getOffice()==null)
+								plist.set(j, new BoxLocation(p2.getBox(),(Office)p1));
+						}else if(o1 instanceof Clean){
+							Clean c = (Clean) o1;
+							if(c.getOffice()==null)
+								plist.set(j, new Clean((Office)p1));
+						}else if(o1 instanceof Dirty){
+							Dirty d = (Dirty) o1;
+							if(d.getOffice()==null)
+								plist.set(j, new Dirty((Office)p1));
+						}else if(o1 instanceof Empty){
+							Empty e = (Empty)o1;
+							if(e.getO()==null)
+								plist.set(j, new Empty((Office)p1));
+						}else if(o1 instanceof RobotLocation){
+							RobotLocation rl = (RobotLocation) o1;
+							if(rl.getOffice()==null)
+								plist.set(j, new RobotLocation((Office)p1));
+						}
+					}
+					//plist has the list fixed
+					this.goal_stack.set(i, plist);
+				}
+			}
+		} else if(p1 instanceof Box){
+			
+			for(int i=this.goal_stack.size()-1;i>=0;i--){
+				Object o = this.goal_stack.get(i);
+				// case operator
+				if(o instanceof Operator){
+					Operator o1 = (Operator) o;
+					if(o1.isPartial()){
+						if(o1 instanceof CleanOffice){
+						}else if(o1 instanceof Move){
+						}else if(o1 instanceof Push){
+							Push m = (Push)o1;
+							if(m.getB()==null){
+								this.goal_stack.set(i, new Push((Box)p1,m.getO1(), m.getO2()));
+							}
+						}
+					}
+					break;
+					// case predicate
+				}else if(o instanceof Predicate){
+					Predicate o1 = (Predicate) o;
+					if(o1 instanceof Adjacent){
+						//Adjacent p1 = (Adjacent) o;
+					}else if(o1 instanceof BoxLocation){
+						BoxLocation p2 = (BoxLocation) o;
+						if(p2.getBox()==null)
+							this.goal_stack.set(i, new BoxLocation((Box)p1,p2.getOffice()));
+					}else if(o1 instanceof Clean){
+					}else if(o1 instanceof Dirty){
+					}else if(o1 instanceof Empty){
+					}else if(o1 instanceof RobotLocation){
+					}
+					//case arraylist
+				}else if(o instanceof ArrayList){
+					ArrayList<Predicate> plist = (ArrayList<Predicate>) o;
+					for(int j=0;i<plist.size();j++){
+						Predicate o1 = (Predicate) plist.get(j);
+						if(o1 instanceof Adjacent){
+							//Adjacent p1 = (Adjacent) o;
+						}else if(o1 instanceof BoxLocation){
+							BoxLocation p2 = (BoxLocation) o;
+							if(p2.getBox()==null)
+								plist.set(j, new BoxLocation((Box)p1,p2.getOffice()));
+						}else if(o1 instanceof Clean){
+						}else if(o1 instanceof Dirty){
+						}else if(o1 instanceof Empty){
+						}else if(o1 instanceof RobotLocation){
+						}
+					}
+					this.goal_stack.set(i, plist);
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Random from a list
+	 * @param min
+	 * @param max
+	 * @return
+	 */
+	public Office randOffice(ArrayList<Office> array) {
+
+		Random rn = new Random();
+		int range = array.size() - 1 + 1;
+		int randomNum =  rn.nextInt(range);
+		return array.get(randomNum);
+	}
+	/**
+	 * Best action first
+	 */
+	public void execute_planner(){
+		operator_solution = new ArrayList<Operator>();
+		state_solution = new ArrayList<State>();
+		nodes = new ArrayList<Node>();
+		this.curr_state = this.init_state.copyState();
+		while(!this.curr_state.equals(this.goal_state)){
+			curr_operator = this.getBestOperator(this.curr_state);
+			curr_state = generateNextState(curr_state, curr_operator);
+			operator_solution.add(curr_operator);
+			state_solution.add(curr_state);
+		}
+	}
+
+	public void execute_planner_BFS(){
+		operator_solution = new ArrayList<Operator>();
+		state_solution = new ArrayList<State>();
+		nodes = new ArrayList<Node>();
+		this.curr_state = this.init_state.copyState();
+		ArrayList<State> state_history = new ArrayList<State>();
+		int depth = 0;
+		Node n = new Node(this.curr_state,null,null,depth);
+		nodes.add(n);
+		boolean found = false;
+		//repeat until a node has a solution
+		while(!found){
+
+			//create all children from current state
+			for(Node m : get_levelNodes(depth)){
+				for(Operator o: m.getCurrent_state().possibleActions()){
+					State nextState = generateNextState(m.getCurrent_state(), o);
+					if(!states_visited(m).contains(nextState)){
+						//will add a node only if it is equal or closer to the goal state(by counting the different predicates)
+						if(getDiffValState(m.getCurrent_state(), this.goal_state)>=getDiffValState(nextState,this.goal_state))
+							nodes.add(new Node(nextState,m,o,depth+1));
+					}
+				}
+				n=m;
+				found = n.getCurrent_state().equals(this.goal_state);
+				if(found){
+					this.operator_solution=operators_visited(n);
+					break;
+				}
+			}
+			depth++;
+		}
+
+	}
+
+	/**
+	 * Returns a list of the nodes of the current depth level
+	 * @param depth
+	 * @return
+	 */
+	public ArrayList<Node> get_levelNodes(int depth){
+		ArrayList<Node> out = new ArrayList<Node>();
+		for(Node n : nodes){
+			if(n.getDepth()==depth){
+				out.add(n);
+			}
+		}
+		return out;
+	}
+	/**
+	 * Returns a list of the states from this node to the root
+	 * @param n
+	 * @return
+	 */
+	public ArrayList<State> states_visited(Node n){
+		ArrayList<State> states_visit = new ArrayList<State>();
+		states_visit.add(n.getCurrent_state());
+		Node act_n = n;
+		while(act_n.getDepth()>0){
+			act_n = act_n.getParent_node();
+			states_visit.add(act_n.getCurrent_state());
+		}
+		return states_visit;
+	}
+
+	/**
+	 * Returns a list of the states from this node to the root
+	 * @param n
+	 * @return
+	 */
+	public ArrayList<Operator> operators_visited(Node n){
+		ArrayList<Operator> operator_visit = new ArrayList<Operator>();
+		operator_visit.add(n.getCurrent_operator());
+		Node act_n = n;
+		while(act_n.getDepth()>1){
+			act_n = act_n.getParent_node();
+			operator_visit.add(0,act_n.getCurrent_operator());
+		}
+		return operator_visit;
+	}
+
+	/**
+	 * @return the init_state
+	 */
+	public State getInit_state() {
+		return init_state;
+	}
+
+
+	/**
+	 * @param init_state the init_state to set
+	 */
+	public void setInit_state(State init_state) {
+		this.init_state = init_state;
+	}
+
+
+	/**
+	 * @return the goal_state
+	 */
+	public State getGoal_state() {
+		return goal_state;
+	}
+
+
+	/**
+	 * @param goal_state the goal_state to set
+	 */
+	public void setGoal_state(State goal_state) {
+		this.goal_state = goal_state;
+	}
+
+
+	/**
+	 * @return the curr_state
+	 */
+	public State getCurr_state() {
+		return curr_state;
+	}
+
+
+	/**
+	 * @param curr_state the curr_state to set
+	 */
+	public void setCurr_state(State curr_state) {
+		this.curr_state = curr_state;
+	}
+
+
+	/**
+	 * @return the operator_solution
+	 */
+	public ArrayList<Operator> getOperator_solution() {
+		return operator_solution;
+	}
+
+
+	/**
+	 * @param operator_solution the operator_solution to set
+	 */
+	public void setOperator_solution(ArrayList<Operator> operator_solution) {
+		this.operator_solution = operator_solution;
+	}
+
+
+	/**
+	 * @return the curr_operator
+	 */
+	public Operator getCurr_operator() {
+		return curr_operator;
+	}
+
+
+	/**
+	 * @param curr_operator the curr_operator to set
+	 */
+	public void setCurr_operator(Operator curr_operator) {
+		this.curr_operator = curr_operator;
+	}
+
+
+	/**
+	 * @return the state_solution
+	 */
+	public ArrayList<State> getState_solution() {
+		return state_solution;
+	}
+
+
+	/**
+	 * @param state_solution the state_solution to set
+	 */
+	public void setState_solution(ArrayList<State> state_solution) {
+		this.state_solution = state_solution;
+	}
+
+
+	/**
+	 * Generates the next state given an operator and a state 
+	 * @param a
+	 * @param op
+	 * @return
+	 */
+	public State generateNextState(State a, Operator op){
+		if(op==null){
+			System.out.println("Null operator");
+			return null;
+		}
+		State out = a.copyState();
+		out.deletePredicates(op.getList_delete());
+		out.addPredicates(op.getList_add());
+		return out;
+	}
+	/**
+	 * Adds the predicates Clean to all offices, because by default are not included
+	 */
+	public void addCleanResult(){
+		ArrayList<Predicate> out = new ArrayList<Predicate>();
+		for(Office a : goal_state.getOffices()){
+			Clean c = new Clean(a);
+			out.add(c);
+		}
+		goal_state.addPredicates(out);
+	}
+
+	public int getValueState(Operator o,State a){
+		int out = 0;
+		//get the number of different items from this state and the goal
+		int dif = getDiffValState(a, this.goal_state);
+		//System.out.print(o.toString()+"\tDif val:"+dif);
+		if(dif<2){
+			if(o.getName().contains("MOVE"))
+				out+=30;
+		}
+		if(o.getName().contains("PUSH")){
+			Push p = (Push) o;
+			Dirty d = new Dirty(p.getO2());
+			//moving a box to a dirty office
+			if(a.getPredicates().contains(d))
+				out -= 30;
+			//moving a box to its goal office
+			else if(p.getO2().equals(this.goal_state.getBoxOffice(p.getB()))){
+				out += 30;
+			}
+			//moving a box from its goal office
+			if(p.getO1().equals(this.goal_state.getBoxOffice(p.getB()))){
+				Dirty d2 = new Dirty(p.getO1());
+				//if the place where the box is, it is dirty
+				if(a.getPredicates().contains(d2)){
+					out += 3;
+				} else{
+					out -= 3;
+				}
+			}
+			else
+				out = 1;
+		} else if(o.getName().contains("CLEAN")){
+			out += 35;
+		} else if(o.getName().contains("MOVE")){
+			Move m = (Move) o;
+			Dirty d3 = new Dirty(m.getO2());
+			// moving to a dirty office
+			if(m.getO2().equals(d3)){
+				out += 20;
+			}
+		}
+		//Check if the robot is at a dirty place
+		if(a.robotAtDirty()){
+			out += 10;
+			if(a.robotAtEmpty())
+				out += 20;
+			else
+				out += 1;
+		}
+
+		out += 100-dif;
+		//System.out.print("\tOp val:"+out+"\n");
+		return out;
+
+	}
+	// Returns the number of similar predicates between two states
+	public int getDiffValState(State a, State b){
+		int out = 0;
+		ArrayList<Predicate> p_list = (ArrayList<Predicate>) a.getPredicates();
+		for(Predicate a_p : p_list){
+			if(!b.getPredicates().contains(a_p))
+				out++;
+		}
+		//System.out.println(sim);
+		return out;
+	}
+
+	public Operator getBestOperator(State a){
+		Operator out = null;
+		int out_2 = 0;
+		if(a.possibleActions()==null){
+			System.out.println("No actions allowed");
+			return null;
+		}
+		for (Operator o : a.possibleActions()){
+			State tmp = a.copyState();
+			//System.out.println("Checking:"+o.toString());
+			tmp = this.generateNextState(tmp, o);
+			if(state_solution!=null)
+				if(state_solution.contains(tmp)) 
+					continue; // visited states keep discarted
+			int tmp_2 = getValueState(o,tmp);
+			if(tmp_2>out_2){
+				out = o;
+				out_2 = tmp_2;
+			}
+		}
+
+		return out;
+	}
+	
+	/**
+	 * Returns a list of predicates considering the position of the robot
+	 * @return
+	 */
+	public ArrayList<Predicate> sortedPredicates(){
+		ArrayList<Predicate> out = new ArrayList<Predicate>();
+		ArrayList<Office> off_seen = new ArrayList<Office>();
+		//first the operators of the current office
+		for(Predicate p:this.goal_state.getPredicatesOffice(this.curr_state.getRobotPosition().id)){
+			out.add(p);
+			off_seen.add(p.getOffice());
+		}
+		//second the adjacent offices
+		for(Office o : this.curr_state.getAdjacentOffices()){
+			for(Predicate p: this.goal_state.getPredicatesOffice(o.id)){
+				out.add(p);
+				off_seen.add(p.getOffice());
+			}
+		}
+		//third the rest of the offices
+		for(Office o : this.goal_state.getOffices()){
+			if(!off_seen.contains(o)){
+				for(Predicate p: this.goal_state.getPredicatesOffice(o.id)){
+					out.add(p);
+					off_seen.add(p.getOffice());
+				}
+			}
+		}
+		Collections.reverse(out);
+		return out;
+	}
+}

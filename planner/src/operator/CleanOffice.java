@@ -68,5 +68,10 @@ public class CleanOffice extends Operator{
 		return super.name;
 	}
 
+	public boolean isPartial(){
+		if(this.getO()==null)
+			return true;
+		else return false;
+	}
 
 }

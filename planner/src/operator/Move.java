@@ -69,9 +69,24 @@ public class Move extends Operator{
 		this.o2 = o2;
 	}
 	public String toString(){
-		return "Move("+o1.id+","+o2.id+")";
+		String of1 = "null";
+	    String of2 = "null";
+	    if(o1!=null){
+	    	of1 = o1.id;
+	    }
+	    if(o2!=null){
+	    	of2 = o2.id;
+	    }
+		return "Move("+of1+","+of2+")";
 	}
 	public String getName(){
 		return super.name;
+	}
+	public boolean isPartial(){
+		if(this.getO1()==null)
+			return true;
+		if(this.getO2()==null)
+			return true;
+		else return false;
 	}
 }

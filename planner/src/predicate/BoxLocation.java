@@ -22,7 +22,15 @@ public class BoxLocation extends Predicate {
 	}
 	
 	public String toString(){
-		return "Box-location("+ b.id + "," + o.id + ")";
+		String of1 = "null";
+		String b1 = "null";
+		if(b!=null){
+			b1 = b.id;
+		}
+		if(o!=null){
+			of1 = o.id;
+		}
+		return "Box-location("+ b1 + "," + of1 + ")";
 	}
 
 	@Override

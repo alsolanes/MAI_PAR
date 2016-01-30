@@ -25,9 +25,9 @@ public class MyMain {
 		ConfigLoader loader = new ConfigLoader();
 		ArrayList<String> files = new ArrayList<String>();
 		files.add("config_2Box.txt");
-		files.add("config_2Box_1.txt");
-		files.add("config_3Box_1.txt");
-		files.add("config_4Box.txt");
+		//files.add("config_2Box_1.txt");
+		//files.add("config_3Box_1.txt");
+		//files.add("config_4Box.txt");
 		for(String file_name : files){
 			System.out.println("File: "+file_name);
 			
@@ -35,13 +35,16 @@ public class MyMain {
 			
 			State tmp = new State(loader.getInitialState(), (ArrayList<Office>)loader.getOffices());
 			System.out.println(tmp.printState());
-			RegressionPlanner r = new RegressionPlanner(loader.getState_Initial(), loader.getState_Goal());
+			Planner r = new Planner(loader.getState_Initial(), loader.getState_Goal());
 
 			
-			r.execute_planner();
+			/*r.execute_planner();
 			System.out.println("Best first:"+r.getOperator_solution().toString());
 			r.execute_planner_BFS();
-			System.out.println("Optimal:"+r.getOperator_solution().toString());
+			System.out.println("Optimal:"+r.getOperator_solution().toString());*/
+			
+			System.out.println("Goal Stack planner");
+			r.execute_goalstack_planner();
 		}
 		/*loader.load("config_3Box.txt");
 		

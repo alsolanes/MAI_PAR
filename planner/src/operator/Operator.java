@@ -70,5 +70,6 @@ public abstract class Operator {
 	}
 	
 	public abstract String getName();
+	public abstract boolean isPartial();
 	
 }

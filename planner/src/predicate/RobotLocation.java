@@ -19,7 +19,10 @@ public class RobotLocation extends Predicate {
 	}
 	
 	public String toString(){
-		return "Robot-location("+o.id+")";
+		String of="null";
+		if(o!=null)
+			of = o.id;
+		return "Robot-location("+of+")";
 	}
 
 	public Office getOffice() {

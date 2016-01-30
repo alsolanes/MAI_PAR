@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Encapsulate field &apos;predicate.Predicate.partiallyInstanced&apos; in &apos;predicate.Predicate&apos;&#x0D;&#x0A;- Original project: &apos;planner&apos;&#x0D;&#x0A;- Original element: &apos;predicate.Predicate.partiallyInstanced&apos;&#x0D;&#x0A;- Getter method name: &apos;isPartiallyInstanced&apos;&#x0D;&#x0A;- Setter method name: &apos;setPartiallyInstanced&apos;&#x0D;&#x0A;- Field visibility: &apos;public&apos;&#x0D;&#x0A;- Use getter and setter methods in declaring type" comments="false" declaring="true" description="Encapsulate field &apos;partiallyInstanced&apos;" flags="589830" getter="isPartiallyInstanced" id="org.eclipse.jdt.ui.self.encapsulate" input="/src&lt;predicate{Predicate.java[Predicate^partiallyInstanced" insertion="3" setter="setPartiallyInstanced" stamp="1453987405304" version="1.0" visibility="1"/>
+</session>
